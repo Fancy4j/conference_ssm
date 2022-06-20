@@ -7,6 +7,7 @@ import Index from '@/components/Index'
 import userManage from '@/components/userManage'
 import billManage from '@/components/billManage'
 import conferenceDetail from "@/components/conferenceDetail";
+import conf_submit from "@/components/conf_submit";
 Vue.use(VueRouter)
 
 const routes = [
@@ -71,6 +72,13 @@ const routes = [
         path: 'conferenceDetail',
         name:  '会议详情',
         component: conferenceDetail,
+        meta: {
+          requireAuth: true
+        }
+      },{
+        path: 'conf_submit',
+        name:  '投稿',
+        component: conf_submit,
         meta: {
           requireAuth: true
         }

@@ -70,6 +70,7 @@
                 //console.log(resp)
                 if(resp.data.code == 200){
                   sessionStorage.setItem("loginUserName",_this.user.userName)
+                  sessionStorage.setItem("userID",_this.userID)
                   sessionStorage.setItem("loginRealName",resp.data.data.realName)
                   sessionStorage.setItem("UserIsLogin",1)
                   if (resp.data.data.role == 1001){

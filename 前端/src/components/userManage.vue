@@ -96,6 +96,7 @@ export default {
   data() {
     return {
       loginUserName: "",
+      userID: "",
       tableData: [],
       total: 1,
       pageSize: 10,
@@ -104,6 +105,8 @@ export default {
   },
   created() {
     this.loginUserName = sessionStorage.getItem("loginUserName")
+    this.userID = sessionStorage.getItem("userID")
+
     this.handleCurrentChange(this.currentPage)
   },
 
@@ -235,7 +238,7 @@ export default {
     enterDetail(row){
       let _this = this;
       alert(row.userID);
-      let data = {userID:row.userID , userName:row.userName , userPwd:row.userPwd , status:row.status , role:row.role , realName:row.realName};
+      let data = {userID:row.userID , userName:row.userName , userPwd:row.userPwd , status:row.status , role:row.role , realName:row.realName,location:row.location,starttime:row.starttime,endtime:row.endtime,name:row.name};
       _this.$router.push({path:'/caiwu/management/conferenceDetail',query: data})
     }
   }
