@@ -1,9 +1,12 @@
+<!-- 这是查看投稿记录页面 -->
+
+
 <template>
   <div>
     <el-form :inline="true" label-width="80px">
       <el-form-item>
         <el-input v-model="search"
-                  placeholder="输入XX号查询"
+                  placeholder="请输入文章标题"
                   clearable
         ></el-input>
       </el-form-item>
@@ -123,7 +126,7 @@ export default {
       },
       billNumOld:'',
       rules: {//必填，聚焦
-        billNum: [{ required: true, message: '请输入发票号', trigger: 'blur' }],
+        billNum: [{ required: true, message: '请输入文章标题', trigger: 'blur' }],
         baoxiaoName: [{ required: true, message: '请输入报销人名称', trigger: 'blur' }],
         realName: [{ required: true, message: '请输入录入人真实姓名', trigger: 'blur' }],
         amount: [{ required: true, message: '请输入金额', trigger: 'blur' },
@@ -177,7 +180,9 @@ export default {
 
     },
     billUpdate(index, row){
-      const _this = this
+
+      const _this = this;
+      this.dialogUpdate = true;
       _this.billNumOld=row.billNum
       //先把表单置空,清除校验提示信息残留
       if (_this.$refs['updateFormData'] != undefined) { //当窗口不可见时重置表单'addFormData'，所以第一次判”空“
@@ -189,8 +194,8 @@ export default {
         _this.entityObj[propName] = row[propName]
         //_this.isUpdateEntityObj[propName] = row[propName]
       }
-      _this.entityObj.realName=row.user.realName
-      this.dialogUpdate = true
+      _this.entityObj.realName=row.user.realName;
+      this.dialogUpdate = true;
 
     },
     updateSure(){
