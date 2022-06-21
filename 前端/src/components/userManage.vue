@@ -14,24 +14,24 @@
       :row-class-name="tableRowClassName">
       <el-table-column
         sortable
-        prop="userName"
+        prop="starttime"
         label="开始时间"
         width="257">
       </el-table-column>
       <el-table-column
-        prop="realName"
+        prop="endtime"
         sortable
         label="截止时间"
         width="257">
       </el-table-column>
       <el-table-column
         sortable
-        prop="realName"
+        prop="abbreviation"
         label="会议简称"
         width="259">
       </el-table-column>
       <el-table-column
-        prop="realName"
+        prop="name"
         label="会议名称"
         width="259">
       </el-table-column>
@@ -105,13 +105,14 @@ export default {
   created() {
     this.loginUserName = sessionStorage.getItem("loginUserName")
     this.handleCurrentChange(this.currentPage)
+
   },
 
   methods: {
     handleCurrentChange(currentPage){
       const _this = this
       _this.currentPage = currentPage
-      _this.$http.post(_this.$globalInfo.httpPath+'userQuery?pageNum='+ _this.currentPage).then(function (resp) {
+      _this.$http.get(_this.$globalInfo.httpPath+'meeting/getMeetingList?pageNum='+ _this.currentPage+"&pageSize="+_this.pageSize).then(function (resp) {
         //console.log(_this.currentPage)
        // console.log(resp)
         if(resp.data.code == 200){
@@ -125,11 +126,16 @@ export default {
 
     },
     filterStatus(value, row){
-           return row.status === value;
+          // let date = new Date();
+          // if( value == 1 && row.endtime.getTime() - date.getTime() > 0){
+          //     return true;
+          // }else if(row.endtime.getTime() - date.getTime() < 0) {
+          //       return true;
+          // }
+          // return false;
+          return value === row.status;
     }
     ,
-
-
     handleEnable(index, row) {
       console.log(index, row);
       //row.status=0?1:0

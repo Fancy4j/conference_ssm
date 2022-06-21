@@ -66,17 +66,24 @@
               let _this = this
               this.$refs.loginForm.validate(valid => {
                 if (valid) {
-              _this.$http.post(_this.$globalInfo.httpPath + 'Login?userName=' + _this.user.userName + '&userPwd=' + encodeURIComponent(encodeURIComponent(_this.user.userPwd))).then(function (resp) {
+              _this.$http.post(_this.$globalInfo.httpPath + 'login?userName=' + _this.user.userName + '&userPwd=' + encodeURIComponent(encodeURIComponent(_this.user.userPwd))).then(function (resp) {
                 //console.log(resp)
                 if(resp.data.code == 200){
                   sessionStorage.setItem("loginUserName",_this.user.userName)
                   sessionStorage.setItem("loginRealName",resp.data.data.realName)
-                  sessionStorage.setItem("UserIsLogin",1)
-                  if (resp.data.data.role == 1001){
-                    _this.$router.push({path: "/caiwu/Shouye"})
-                  }else if(resp.data.data.role == 1002){
-                    _this.$router.push({path: "/caiwu/management"})
+                  sessionStorage.setItem("userID",resp.data.data.userId);
+                  sessionStorage.setItem("UserIsLogin", 1);
+                  let userRole = resp.data.data.userRole;
+                  if(_this.user.roles === "投稿人" && userRole.search("1")!=-1){
+                    _this.$router.push({path: "/caiwu/management"});
+                  }else{
+                    _this.$message.warning("权限不足");
                   }
+                  // if (resp.data.data.userRole == "1001"){
+                  //   _this.$router.push({path: "/caiwu/Shouye"})
+                  // }else if(resp.data.data.userRole == 1002){
+                  //   _this.$router.push({path: "/caiwu/management"})
+                  // }
               _this.$message.success(resp.data.data.realName+'欢迎您！')
                 }else{
                   _this.$message.warning(resp.data.message)

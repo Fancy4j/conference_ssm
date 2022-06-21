@@ -18,8 +18,6 @@
         name: "conferenceDetail",
         data(){
             return{
-
-
             }
         },
         created() {

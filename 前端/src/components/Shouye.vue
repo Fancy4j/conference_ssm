@@ -42,8 +42,8 @@
     </el-form>
     <h1>录入XX信息</h1>
     <el-form ref="ruleFormRef" :model="ruleForm" label-width="80px" :rules="billrules">
-      <el-form-item label="XX号:" prop="billNum">
-        <el-input v-model="ruleForm.billNum" placeholder="必须是纯数字" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
+      <el-form-item label="XX号:" prop="status">
+        <el-input v-model="ruleForm.status" placeholder="必须是纯数字" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
       </el-form-item>
       <el-form-item label="XX人:" prop="baoxiaoName">
         <el-input v-model="ruleForm.baoxiaoName"></el-input>
@@ -58,8 +58,8 @@
     </el-form>
     <el-dialog title="确认XX信息" :visible.sync="dialogSure" append-to-body>
       <el-form ref="ruleFormSure" :model="ruleForm" label-width="80px" :rules="billrules">
-        <el-form-item label="XX号:" prop="billNum">
-          <el-input v-model="ruleForm.billNum" placeholder="必须是纯数字" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
+        <el-form-item label="XX号:" prop="status">
+          <el-input v-model="ruleForm.status" placeholder="必须是纯数字" oninput="value=value.replace(/[^\d]/g,'')"></el-input>
         </el-form-item>
         <el-form-item label="XX人:" prop="baoxiaoName">
           <el-input v-model="ruleForm.baoxiaoName"></el-input>
@@ -76,7 +76,7 @@
     <el-dialog title="XX信息" :visible.sync="dialogSearch" append-to-body>
       <el-form :model="infoForm">
         <el-form-item label="XX号：" :label-width="formLabelWidth">
-          <el-input v-model="infoForm.billNum" autocomplete="off" disabled></el-input>
+          <el-input v-model="infoForm.status" autocomplete="off" disabled></el-input>
         </el-form-item>
         <el-form-item label="XX人：" :label-width="formLabelWidth">
           <el-input v-model="infoForm.baoxiaoName" autocomplete="off" disabled></el-input>
@@ -152,12 +152,12 @@
           dialogVisible: false,
           dialogSure:false,
           ruleForm: {
-            billNum: '',
+            status: '',
             baoxiaoName: '',
             amount: '',
           },
          infoForm:{
-           billNum:'',
+           status:'',
            baoxiaoName:'',
            luruName:'',
            amount:'',
@@ -178,7 +178,7 @@
             ],
           },
           billrules:{
-            billNum: [{ required: true, message: '请输入XX号', trigger: 'blur' }],
+            status: [{ required: true, message: '请输入XX号', trigger: 'blur' }],
             baoxiaoName: [{ required: true, message: '请输入XX报销人名称', trigger: 'blur' }],
             amount: [{ required: true, message: '请输入XX金额', trigger: 'blur' },
               {pattern: /^-?\d{1,16}(?:\.\d{1,4})?$/g,
@@ -197,15 +197,15 @@
           console.log(_this.infoForm)
           this.$refs.ruleFormRef.validate(valid => {
             if (valid) {
-              _this.$http.post(_this.$globalInfo.httpPath + 'billAdd?billNum='
-                + _this.ruleForm.billNum+ '&baoxiaoName='
+              _this.$http.post(_this.$globalInfo.httpPath + 'billAdd?status='
+                + _this.ruleForm.status+ '&baoxiaoName='
                 + _this.ruleForm.baoxiaoName+'&amount='
                 + _this.ruleForm.amount +'&userName=' + loginUserName).then(function (resp) {
                 console.log(resp)
                 if(resp.data.code == 200){
                   //_this.infoForm=resp.data.data
                  // _this.infoForm.luruName=resp.data.data.user.realName
-                  _this.$message.success(_this.ruleForm.billNum+resp.data.message)
+                  _this.$message.success(_this.ruleForm.status+resp.data.message)
                   _this.dialogSure=false
                   _this.resetForm('ruleFormRef')
                 }else{
@@ -230,7 +230,7 @@
         },
         searchInfo(){
           let _this = this
-              _this.$http.post(_this.$globalInfo.httpPath + 'billQuery?billNum=' + _this.search).then(function (resp) {
+              _this.$http.post(_this.$globalInfo.httpPath + 'billQuery?status=' + _this.search).then(function (resp) {
                 console.log(resp)
                 if(resp.data.code == 200){
                   _this.infoForm=resp.data.data
