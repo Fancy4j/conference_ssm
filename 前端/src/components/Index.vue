@@ -28,11 +28,11 @@
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-menu"></i>
-              <span>投稿人</span>
+              <span>{{ role }}</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/caiwu/management/userManage"><i class="el-icon-s-order" />会议信息</el-menu-item>
-              <el-menu-item index="/caiwu/management/billManage"><i class="el-icon-coin" />投稿记录</el-menu-item>
+              <el-menu-item index="/caiwu/management/userManage"><i class="el-icon-s-order" />{{ menu1 }}</el-menu-item>
+              <el-menu-item index="/caiwu/management/billManage"><i class="el-icon-coin" />{{ menu2 }}</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
         </el-menu>
@@ -78,8 +78,19 @@
 <script>
 export default {
   created(){
-    this.loginUserName = sessionStorage.getItem("loginUserName")
-    this.loginRealName = sessionStorage.getItem("loginRealName")
+    this.loginUserName = sessionStorage.getItem("loginUserName");
+    this.loginRealName = sessionStorage.getItem("loginRealName");
+    this.role = sessionStorage.getItem("userRole");
+    if (this.role == "投稿人"){
+      this.menu1 = "查看会议";
+      this.menu2 = "投稿记录";
+    }else if(this.role == "审稿人"){
+      this.menu1 = "审稿记录";
+      this.menu2 = "";
+    }else{
+      this.menu1 = "123";
+      this.menu2 = "123";
+    }
   },
   data() {
     const validateNewPassword2 = (rule, value, callback) => {
@@ -90,6 +101,9 @@ export default {
       }
     }
     return {
+      menu1:"",
+      menu2:"",
+      role:"",
       loginUserName: "",
       dialogVisible: false,
       loginForm: {

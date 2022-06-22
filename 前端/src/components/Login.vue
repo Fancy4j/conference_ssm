@@ -71,20 +71,27 @@
                 if(resp.data.code == 200){
                   sessionStorage.setItem("loginUserName",_this.user.userName)
                   sessionStorage.setItem("loginRealName",resp.data.data.realName)
-                  sessionStorage.setItem("userID",resp.data.data.userId);
+                  sessionStorage.setItem("userId",resp.data.data.userId);
                   sessionStorage.setItem("UserIsLogin", 1);
+
                   let userRole = resp.data.data.userRole;
-                  if(_this.user.roles === "投稿人" && userRole.search("1")!=-1){
+                  if(_this.user.roles == "投稿人"){
+                    _this.$router.push({path: "/caiwu/management"});
+                  }else if(_this.user.roles == "审稿人" && userRole.search("2")!=-1){
+                    _this.$router.push({path: "/caiwu/management/reviewerManager"});
+                  }else if(_this.user.roles == "主席" && userRole.search("3")!=-1){
                     _this.$router.push({path: "/caiwu/management"});
                   }else{
                     _this.$message.warning("权限不足");
+                    return false;
                   }
+                  sessionStorage.setItem("userRole",_this.user.roles);
                   // if (resp.data.data.userRole == "1001"){
                   //   _this.$router.push({path: "/caiwu/Shouye"})
                   // }else if(resp.data.data.userRole == 1002){
                   //   _this.$router.push({path: "/caiwu/management"})
                   // }
-              _this.$message.success(resp.data.data.realName+'欢迎您！')
+                _this.$message.success(resp.data.data.realName+'欢迎您！')
                 }else{
                   _this.$message.warning(resp.data.message)
                   return false;

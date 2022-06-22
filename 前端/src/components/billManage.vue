@@ -227,7 +227,7 @@ export default {
         if(resp.data.code == 200){
 
           _this.tableData=resp.data.data.list
-          alert(_this.tableData);
+
           _this.total = resp.data.data.total
         }else{
           _this.$message.warning(resp.data.message);

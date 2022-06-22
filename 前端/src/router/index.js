@@ -7,6 +7,7 @@ import Index from '@/components/Index'
 import userManage from '@/components/userManage'
 import billManage from '@/components/billManage'
 import conferenceDetail from "@/components/conferenceDetail";
+import reviewerManager from "../components/reviewerManager";
 Vue.use(VueRouter)
 
 const routes = [
@@ -63,6 +64,15 @@ const routes = [
         name: '发票管理',
         icons: 'el-icon-key',
         component: billManage,
+        meta: {
+          requireAuth: true
+        },
+      },
+      {
+        path: 'reviewerManager',
+        name: '发票管理',
+        icons: 'el-icon-key',
+        component: reviewerManager,
         meta: {
           requireAuth: true
         },
