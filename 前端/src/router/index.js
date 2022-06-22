@@ -8,6 +8,9 @@ import userManage from '@/components/userManage'
 import billManage from '@/components/billManage'
 import conferenceDetail from "@/components/conferenceDetail";
 import conf_submit from "@/components/conf_submit";
+import host_conf_list from "../components/host_conf_list";
+import host_submit from "../components/host_submit";
+import host from "../components/host";
 Vue.use(VueRouter)
 
 const routes = [
@@ -84,6 +87,33 @@ const routes = [
         }
       }],
   },
+  {
+    path: '/caiwu/host',
+    name: '主持人页面',
+    component: host,
+    redirect:"/caiwu/host/host_conf_list",
+    icons: 'el-icon-menu',
+    children: [
+      {
+        path: 'host_conf_list',
+        name: '主持会议列表',
+        icons: 'el-icon-s-order',
+        component: host_conf_list,
+        meta: {
+          requireAuth: true
+        },
+      },
+      {
+        path: 'host_submit',
+        name: '举办会议',
+        icons: 'el-icon-key',
+        component: host_submit,
+        meta: {
+          requireAuth: true
+        },
+      }
+      ]
+  }
 ]
 
 const router = new VueRouter({
