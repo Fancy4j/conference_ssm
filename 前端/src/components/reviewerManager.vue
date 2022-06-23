@@ -5,6 +5,7 @@
   <div>
     <el-main>
       <el-table
+        border
         :data="tableData"
         style="width: 100%">
         <el-table-column
@@ -15,6 +16,12 @@
         <el-table-column
           prop="title"
           label="文章名称"
+          width="auto">
+        </el-table-column>
+        <el-table-column
+          v-if="false"
+          prop="articleId"
+          label="articleId"
           width="auto">
         </el-table-column>
         <el-table-column
@@ -43,6 +50,7 @@
         <el-table-column label="" width="auto">
           <template slot-scope="scope">
             <el-button
+              :disabled = "scope.row.status == '已审稿'"
               size="mini"
               type="primary"
               @click="reviewArticle(scope.$index, scope.row)" >审稿</el-button>
@@ -64,14 +72,20 @@
           <div style="padding-left: 40px">
             <el-form ref="form" :model="form" label-width="80px">
               <el-form-item label="回复评语">
-                <el-input type="textarea" v-model="form.desc" ></el-input>
+                <el-input type="textarea" v-model="form.replay" ></el-input>
+              </el-form-item >
+              <el-form-item label="审稿人ID" v-if = "false">
+                <el-input type="input" v-model="form.reviewerId" ></el-input>
+              </el-form-item >
+              <el-form-item label="文章ID" v-if = "false">
+                <el-input type="input" v-model="form.articleId" ></el-input>
               </el-form-item >
               <el-form-item label = "评分">
                 <el-rate style="padding-left: 15px;float: left ;padding-top: 12px"
                   v-model="value"
                   show-text>
                 </el-rate>
-                <el-input style="float: left" type="hidden" v-model="form.value"></el-input>
+                <el-input style="float: left" type="hidden" v-model="form.status"></el-input>
               </el-form-item>
               <el-form-item style="padding-top: 20px">
                 <el-button type="primary" @click="onSubmit">审稿</el-button>
@@ -105,6 +119,9 @@
 </template>
 
 <script>
+
+  import axios from "axios";
+
     export default {
         name: "reviewerManager",
       data(){
@@ -116,8 +133,10 @@
             total: 1,
             dialogVisible: false,
             form: {
-              desc: '',
-              value:0
+              reviewerId:0,
+              articleId:0,
+              replay: '',
+              status:0
             },
             value: 0
           }
@@ -146,10 +165,10 @@
               _this.tableData=resp.data.data.list;
               _this.total = resp.data.data.total;
               for (let i = 0; i<_this.tableData.length;i++){
-                if(_this.tableData[i].status >= 2){
+                if(_this.tableData[i].status > 2){
                   _this.tableData[i].status = "已审稿";
                 }else{
-                  _this.tableData[i].status = "未审稿";
+                  _this.tableData[i].status = "待审稿";
                 }
               }
             }else{
@@ -162,9 +181,56 @@
         reviewArticle(index , row){
           const _this = this;
           _this.dialogVisible = true;
+          _this.form.articleId = row.articleId;
         },
         onSubmit() {
-          console.log('submit!');
+          let _this = this;
+
+          _this.form.reviewerId = parseInt(_this.reviewId);
+
+          if (_this.value >=4 ){
+            _this.form.status = 3;
+          }else if(_this.value == 3 ){
+            _this.form.status = 0;
+          }else {
+            _this.form.status = 4;
+          }
+          _this.$refs.form.validate(valid => {
+            if (valid) {
+              let data = {reviewerId : _this.form.reviewerId,
+                          articleId : _this.form.articleId,
+                          replay : _this.form.replay,
+                          status : _this.form.status
+              };
+              let config={
+                headers:{'Content-Type':'multipart/form-data'}
+              };
+              axios.post(_this.$globalInfo.httpPath+'reviewer/addReviewerRecord',data).then(function (response) {
+                  _this.$message.success(response.data.message);
+                  _this.flush();
+                  _this.dialogVisible = false;
+              }).catch(function (error){
+                console.log(error)
+                _this.$message.error("输入有误，操作失败");
+              });
+              //alert(JSON.stringify(data));
+              // _this.$http.post(_this.$globalInfo.httpPath + 'reviewer/addReviewerRecord?id=1&reviewerReplay=',data).then(function (resp) {
+              //   console.log(resp)
+              //   alert("???");
+              //   // _this.$router.push({path: "/"})
+              //   if(resp.data.code == 200){
+              //     _this.$router.push({path: "/caiwu/management/reviewerManager"})
+              //     _this.$message.success(resp.data.message)
+              //   }else{
+              //     alert("youwenti")
+              //     _this.$message.warning(resp.data.message)
+              //     return false;
+              //   }
+              //  })
+            }})
+        },
+        flush(){
+          this.handleCurrentChange(1)
         }
       }
     }

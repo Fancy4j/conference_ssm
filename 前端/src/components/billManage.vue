@@ -27,7 +27,7 @@
         style="width: 100%">
         <el-table-column
           prop="title"
-          label="文章名称"
+          label="文章标题"
           width="180">
         </el-table-column>
         <el-table-column
@@ -103,26 +103,24 @@
 <!--      更新发票信息表单-->
       <el-dialog title="修改稿件" :visible.sync="dialogUpdate" append-to-body>
         <el-form :model="entityObj" ref="updateFormData" :rules="rules">
-          <el-form-item label="文章标题：" :label-width="formLabelWidth" prop="status">
-            <el-input v-model="entityObj.status" placeholder="请输入新的文章标题"></el-input>
+          <el-form-item label="文章标题：" :label-width="formLabelWidth" prop="title">
+            <el-input v-model="entityObj.title" placeholder="请输入新的文章标题"></el-input>
           </el-form-item>
-          <el-form-item label="作者：" :label-width="formLabelWidth" prop="baoxiaoName">
-            <el-input v-model="entityObj.baoxiaoName" ></el-input>
+          <el-form-item label="作者：" :label-width="formLabelWidth" prop="authors">
+            <el-input v-model="entityObj.authors" ></el-input>
           </el-form-item>
-<!--          <el-upload-->
-<!--            class="upload-demo"-->
-<!--            :action=" _this.$globalInfo.httpPath +'/fileCommon/uploadV2?fileType=other'"-->
-<!--            accept=".pdf"-->
-<!--            :on-preview="handlePreview"-->
-<!--            :on-remove="handleRemove"-->
-<!--            :before-remove="beforeRemove"-->
-<!--            multiple-->
-<!--            :limit="3"-->
-<!--            :on-exceed="handleExceed"-->
-<!--            :file-list="fileList">-->
-<!--            <el-button size="small" type="primary" >点击上传</el-button>-->
-<!--            <div slot="tip" class="el-upload__tip">只能上传pdf文件</div>-->
-<!--          </el-upload>-->
+           <el-upload
+              ref="upload"
+              class="upload-demo"
+              action="#"
+              accept=".pdf"
+              :auto-upload="false"
+              :on-change="uploadFile"
+              :show-file-list="false"
+            >
+          <el-button type="warning">上传文章</el-button>
+        </el-upload>
+
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogUpdate = false">取 消</el-button>
@@ -148,6 +146,7 @@ export default {
   name: "billManage",
   data() {
     return {
+
       fileList:[],
       reverse:true,
       activities: [],
@@ -182,8 +181,8 @@ export default {
     }
   },
   created() {
-    this.loginUserName = sessionStorage.getItem("loginUserName")
-    this.handleCurrentChange(this.currentPage)
+    this.loginUserName = sessionStorage.getItem("loginUserName");
+    this.handleCurrentChange(this.currentPage);
   },
 
   methods: {
@@ -199,7 +198,23 @@ export default {
     beforeRemove(file, fileList) {
       return this.$confirm(`确定移除 ${ file.name }？`);
     },
-
+      uploadFile (item) {
+        let _this = this;
+        let formData = new FormData();
+        let file = item.raw;
+        alert(file.length);
+        formData.append('file', file);
+        this.$http({
+          url: _this.$globalInfo.httpPath+'/fileCommon/uploadV2', //后端提供的接口
+          method: 'post',
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }).then(({data}) => {
+          this.$alert(data.data)
+        })
+      },
     searchInfo(){
       const _this = this
       _this.$http.post(_this.$globalInfo.httpPath+'billQuery?status=' + _this.search).then(function (resp) {
@@ -222,7 +237,7 @@ export default {
     handleCurrentChange(currentPage){
       const _this = this
       _this.currentPage = currentPage
-      _this.$http.get(_this.$globalInfo.httpPath+'contributor/queryArticles?userId='+sessionStorage.getItem("userID")+'&pageNum='+ _this.currentPage+'&pageSize='+_this.pageSize).then(function (resp) {
+      _this.$http.get(_this.$globalInfo.httpPath+'contributor/queryArticles?userId='+sessionStorage.getItem("userId")+'&pageNum='+ _this.currentPage+'&pageSize='+_this.pageSize).then(function (resp) {
         //console.log(resp)
         if(resp.data.code == 200){
 
