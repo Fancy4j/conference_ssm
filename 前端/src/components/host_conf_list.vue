@@ -41,6 +41,12 @@
           label="截止时间"
           width="auto">
         </el-table-column>
+        <el-table-column
+          prop="meetingId"
+          v-if="false"
+          label=""
+          width="auto">
+        </el-table-column>
 
 
 
@@ -62,40 +68,23 @@
         <el-dialog title="指派审稿人"
                    :visible.sync="dialogVisible1"
                    width=""
-                   @close=""
+                   @close="clearvalue()"
                    append-to-body>
-          <el-transfer
-            filterable
-            :filter-method="filterMethod"
-            filter-placeholder="请输入城市拼音"
-            v-model="value"
-            :data="data">
+
+          <el-transfer v-model="value" :data="data"
+                       filterable
+                       :titles="['未分配的审稿人', '已分配的审稿人']">
+
           </el-transfer>
-          <!--          <el-form ref="loginForm" :model="loginForm" :rules="rules">-->
-          <!--            <el-form-item label="新密码" prop="password" :label-width="formLabelWidth">-->
-          <!--              <el-input-->
-          <!--                type="password"-->
-          <!--                show-password-->
-          <!--                auto-complete="off"-->
-          <!--                placeholder="请设置新密码"-->
-          <!--                v-model="loginForm.password"-->
-          <!--              ></el-input>-->
-          <!--            </el-form-item>-->
-          <!--            <el-form-item label="确认密码" prop="password2" :label-width="formLabelWidth">-->
-          <!--              <el-input-->
-          <!--                type="password"-->
-          <!--                show-password-->
-          <!--                auto-complete="off"-->
-          <!--                placeholder="请确认新密码"-->
-          <!--                v-model="loginForm.password2"-->
-          <!--              ></el-input>-->
-          <!--            </el-form-item>-->
-          <!--          </el-form>-->
+
           <div slot="footer" class="dialog-footer">
+
             <el-button @click="dialogVisible1 = false">取 消</el-button>
-            <el-button type="primary" @click="updatePwd">确 定</el-button>
+            <el-button type="primary" @click="queding()">确 定</el-button>
           </div>
         </el-dialog>
+
+
         <!---------------------------------------------修改的dialog-->
         <el-dialog title="修改会议信息"
                    :visible.sync="dialogVisible2"
@@ -148,6 +137,15 @@
             </template>
           </el-table-column>
 
+        <el-table-column
+          prop="paigao"
+          label="一键派稿"
+          width="auto">
+          <template slot-scope="scope">
+            <el-button type="primary"  @click="paigao(scope.row)">派稿</el-button>
+          </template>
+        </el-table-column>
+
       </el-table>
       <!--分页-->
       <br/>
@@ -169,35 +167,31 @@ import axios from "axios";
 export default {
   name: "host_conf_list",
   data() {
-
-    const generateData = _ => {
-      const data = [];
-      const cities = ['上海', '北京', '广州', '深圳', '南京', '西安', '成都'];
-      const pinyin = ['shanghai', 'beijing', 'guangzhou', 'shenzhen', 'nanjing', 'xian', 'chengdu'];
-      cities.forEach((city, index) => {
-        data.push({
-          label: city,
-          key: index,
-          pinyin: pinyin[index]
-        });
-      });
-      return data;
-    };
+    // const generateData = _ => {
+    //   const data = [];
+    //   for (let i = 1; i <= 15; i++) {
+    //     data.push({
+    //       key: i,
+    //       label: `备选项 ${ i }`,
+    //       disabled: i % 4 === 0
+    //     });
+    //   }
+    //   return data;
+    // };
     return {
+      tmpdata:[],
+      data: [],
+      value: [],
+      findIdByIndex:[],
       form: {
         name: '',
         abbreviation: '',
         detail: ''
       },
       formLabelWidth: '120px',
-      data: generateData(),
-      value: [],
-      filterMethod(query, item) {
-        return item.pinyin.indexOf(query) > -1;
-      },
       meetingId:"",
       loginUserName: "",
-      userID:"",
+      userId:"",
       tableData: [],
       total: 1,
       pageSize: 10,
@@ -208,21 +202,20 @@ export default {
   },
   created() {
     this.loginUserName = sessionStorage.getItem("loginUserName")
-    this.userID = sessionStorage.getItem("userID")
-    this.handleCurrentChange(this.currentPage,this.pageSize,this.userID)
+    this.userId = sessionStorage.getItem("userId")
+    this.handleCurrentChange(this.currentPage,this.pageSize,this.userId)
   },
 
   methods: {
-    handleCurrentChange(currentPage,pageSize,userID){
+    handleCurrentChange(currentPage,pageSize,userId){
       const _this = this
       _this.currentPage = currentPage
       _this.pageSize = pageSize
-      _this.userID = userID
-      _this.$http.get(_this.$globalInfo.httpPath+'/host/queryMeetingList?hostId='+_this.userID +'&pageNum='+ _this.currentPage+'&pageSize='+_this.pageSize).then(function (resp) {
+      _this.userId = userId
+      _this.$http.get(_this.$globalInfo.httpPath+'/host/queryMeetingList?hostId='+_this.userId +'&pageNum='+ _this.currentPage+'&pageSize='+_this.pageSize).then(function (resp) {
 
         if(resp.data.code == 200){
           _this.tableData=resp.data.data.list
-          console.log(_this.tableData)
           _this.total = resp.data.data.total
         }else{
           _this.$message.warning(resp.data.message);
@@ -339,18 +332,101 @@ export default {
     goBack() {
       console.log('go back');
     },
+    clearvalue(){
+      let _this=this
+      _this.data.length=0
+      _this.value.length=0
+      this.$router.go(0)
+    },
     click_appoint(row){
       let _this = this;
+      _this.data=[]
+      _this.value=[]
+      _this.meetingId=row.meetingId;
+      ///////////index必须赋初值
+      let index =0
+      let length1
      // alert("弹出指派窗口");
       _this.dialogVisible1 = true;
+      /////////////得到未分配的审稿人 放左边
+      axios.get(_this.$globalInfo.httpPath+'/host/reviewerAvailable?meetingId='+row.meetingId
 
-      let data = {userID:row.userID , userName:row.userName , userPwd:row.userPwd , status:row.status , role:row.role , realName:row.realName,location:row.location,starttime:row.starttime,endtime:row.endtime,name:row.name};
-    //  _this.$router.push({path:'/caiwu/management/conferenceDetail',query: data})
+
+      ).then(function (response){
+       // alert("左边yes!")
+        if(response.data.data==null){
+          return
+        }
+        length1=response.data.data.length
+
+
+        for(;index<response.data.data.length;index++){
+          let tmp={
+            key:index,
+            label:response.data.data[index].name
+          }
+          let tmp2={
+            _key:index,
+            _value:response.data.data[index].userId
+          }
+          _this.findIdByIndex.push(tmp2)
+          console.log(response.data.data[index].userId)
+          _this.data.push(tmp)
+
+        }
+
+      })
+        .catch(function (error){
+          alert("左边NOOOOO")
+          console.log(error)
+        });
+//////////////////////////////////得到已分配的审稿人 放右边
+      axios.get(_this.$globalInfo.httpPath+'/host/reviewerAllocated?meetingId='+_this.meetingId
+      ).then(function (response){
+    //    console.log(response.data.data)
+      //  alert("右边yes!")
+        for(;index<response.data.data.length+length1;index++){
+          let tmp={
+            key:index,
+            label:response.data.data[index-length1].name
+          }
+          let tmp2={
+            _key:index,
+            _value:response.data.data[index-length1].userId
+          }
+          _this.findIdByIndex.push(tmp2)
+     //     console.log("userId   "+response.data.data[index-length1].userId)
+          _this.data.push(tmp)
+          _this.value.push(index)
+       //   console.log(_this.data)
+        }
+       // console.log(response.data)
+        //  _this.handleCurrentChange(_this.currentPage,_this.pageSize,_this.userId);
+      })
+        .catch(function (error){
+          alert("右边NOOOOO")
+          console.log(error)
+        });
+
+
     },
     modify(row){
       let _this= this;
       _this.dialogVisible2 = true;
       _this.meetingId=row.meetingId;
+    },
+    paigao(row){
+      let _this=this;
+      axios.get(_this.$globalInfo.httpPath+'/host/dispatchArticle?meetingId='+row.meetingId
+      ).then(function (response){
+        alert("派稿成功!")
+        console.log(response.data)
+      })
+        .catch(function (error){
+          alert("NOOOOO")
+          console.log(error)
+        });
+
     },
     updateform(){
     //  alert("meetingId:"+row.meetingId)
@@ -372,17 +448,73 @@ export default {
 
 
       ).then(function (response){
-        alert("yes!")
+        //alert("yes!")
         console.log(response)
         _this.dialogVisible2=false
-        _this.handleCurrentChange(_this.currentPage,_this.pageSize,_this.userID);
+        _this.handleCurrentChange(_this.currentPage,_this.pageSize,_this.userId);
       })
         .catch(function (error){
         alert("NOOOOO")
           console.log(error)
         });
 
+    },
+    filterTime(time) {
+      var date = new Date(time);
+      var y = date.getFullYear();
+      var m = date.getMonth() + 1;
+      m = m < 10 ? "0" + m : m;
+      var d = date.getDate();
+      d = d < 10 ? "0" + d : d;
+      var h = date.getHours();
+      h = h < 10 ? "0" + h : h;
+      var minute = date.getMinutes();
+      minute = minute < 10 ? "0" + minute : minute;
+      var s = date.getSeconds();
+      s = s < 10 ? "0" + s : s;
+      return y + "-" + m + "-" + d + " " + h + ":" + minute + ":" + s;
+    },
+    getTTT(){
+      let date= new Date();
+      return this.filterTime(date);
+    },
+    queding(row){
+      let _this=this;
+      _this.dialogVisible1=false;
+      let i=0
+      let c=[]
+      let a=''
+      for(;i<_this.value.length;i++){
+      //  alert(_this.findIdByIndex[_this.value[i]])
+        c.push(_this.findIdByIndex[_this.value[i]]._value)
 
+      }
+      if(c.length==0){a=','}else {a=c.join(',')}
+      console.log(a)
+      // console.log("value:::::::::"+_this.value)
+      // console.log("IDs:::::::::"+_this.findIdByIndex)
+
+      console.log(_this.$globalInfo.httpPath+'/host/userStatusUpdate2?meetingId='+_this.meetingId+'&appointTime='+_this.getTTT()+'&userIds='+a)
+      axios.post(_this.$globalInfo.httpPath+'/host/userStatusUpdate2?meetingId='+_this.meetingId+'&appointTime='+_this.getTTT()+'&userIds='+a,
+
+      ).then(function (response){
+
+     //   alert("yes!")
+        console.log(response)
+        _this.dialogVisible2=false
+        _this.handleCurrentChange(_this.currentPage,_this.pageSize,_this.userId);
+      })
+        .catch(function (error){
+          alert("NOOOOO")
+          console.log(error)
+        });
+
+    },
+    handleLeft(){
+      alert("点击左三角")
+    },
+    handleRight(){
+      alert("点击右三角")
     }
   }
 }

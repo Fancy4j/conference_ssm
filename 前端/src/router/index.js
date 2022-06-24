@@ -11,8 +11,8 @@ import conf_submit from "@/components/conf_submit";
 import host_conf_list from "../components/host_conf_list";
 import host_submit from "../components/host_submit";
 import host from "../components/host";
+import reviewerManager from "../components/reviewerManager";
 Vue.use(VueRouter)
-
 const routes = [
   {
     path: '/',
@@ -63,6 +63,33 @@ const routes = [
         },
       },
       {
+        path: 'host_conf_list',
+        name: '主持会议列表',
+        icons: 'el-icon-s-order',
+        component: host_conf_list,
+        meta: {
+          requireAuth: true
+        },
+      },
+      {
+        path: 'host_submit',
+        name: '举办会议',
+        icons: 'el-icon-key',
+        component: host_submit,
+        meta: {
+          requireAuth: true
+        },
+      },
+      {
+        path: 'reviewerManager',
+        name: '发票管理',
+        icons: 'el-icon-key',
+        component: reviewerManager,
+        meta: {
+          requireAuth: true
+        },
+      },
+      {
         path: 'billManage',
         name: '发票管理',
         icons: 'el-icon-key',
@@ -92,27 +119,8 @@ const routes = [
     name: '主持人页面',
     component: host,
     redirect:"/caiwu/host/host_conf_list",
-    icons: 'el-icon-menu',
-    children: [
-      {
-        path: 'host_conf_list',
-        name: '主持会议列表',
-        icons: 'el-icon-s-order',
-        component: host_conf_list,
-        meta: {
-          requireAuth: true
-        },
-      },
-      {
-        path: 'host_submit',
-        name: '举办会议',
-        icons: 'el-icon-key',
-        component: host_submit,
-        meta: {
-          requireAuth: true
-        },
-      }
-      ]
+    icons: 'el-icon-menu'
+
   }
 ]
 

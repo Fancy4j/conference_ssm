@@ -14,25 +14,37 @@
       :row-class-name="tableRowClassName">
       <el-table-column
         sortable
-        prop="userName"
+        prop="starttime"
         label="开始时间"
         width="257">
       </el-table-column>
       <el-table-column
-        prop="realName"
+        prop="endtime"
         sortable
         label="截止时间"
         width="257">
       </el-table-column>
       <el-table-column
         sortable
-        prop="realName"
+        prop="abbreviation"
         label="会议简称"
         width="259">
       </el-table-column>
       <el-table-column
-        prop="realName"
+        prop="name"
         label="会议名称"
+        width="259">
+      </el-table-column>
+      <el-table-column
+        v-if="false"
+        prop="detail"
+        label="detail"
+        width="259">
+      </el-table-column>
+      <el-table-column
+        v-if="false"
+        prop="meetingId"
+        label="meetingId"
         width="259">
       </el-table-column>
 
@@ -53,7 +65,7 @@
 
 
       <el-table-column
-        prop="realName"
+        prop="ref"
         label="会议链接"
         width="258">
         <template slot-scope="scope">
@@ -95,8 +107,10 @@ export default {
   name: "userManage",
   data() {
     return {
+      userId:"",
+      meetingId: "",
+      detail:"",
       loginUserName: "",
-      userID: "",
       tableData: [],
       total: 1,
       pageSize: 10,
@@ -105,21 +119,22 @@ export default {
   },
   created() {
     this.loginUserName = sessionStorage.getItem("loginUserName")
-    this.userID = sessionStorage.getItem("userID")
-
     this.handleCurrentChange(this.currentPage)
+
   },
 
   methods: {
     handleCurrentChange(currentPage){
       const _this = this
       _this.currentPage = currentPage
-      _this.$http.post(_this.$globalInfo.httpPath+'userQuery?pageNum='+ _this.currentPage).then(function (resp) {
+      _this.$http.get(_this.$globalInfo.httpPath+'meeting/getMeetingList?pageNum='+ _this.currentPage+"&pageSize="+_this.pageSize).then(function (resp) {
         //console.log(_this.currentPage)
        // console.log(resp)
         if(resp.data.code == 200){
           _this.tableData=resp.data.data.list
+          console.log(_this.tableData)
           _this.total = resp.data.data.total
+
         }else{
           _this.$message.warning(resp.data.message);
           return false;
@@ -128,11 +143,16 @@ export default {
 
     },
     filterStatus(value, row){
-           return row.status === value;
+          // let date = new Date();
+          // if( value == 1 && row.endtime.getTime() - date.getTime() > 0){
+          //     return true;
+          // }else if(row.endtime.getTime() - date.getTime() < 0) {
+          //       return true;
+          // }
+          // return false;
+          return value === row.status;
     }
     ,
-
-
     handleEnable(index, row) {
       console.log(index, row);
       //row.status=0?1:0
@@ -237,9 +257,10 @@ export default {
     },
     enterDetail(row){
       let _this = this;
-      alert(row.userID);
-      let data = {userID:row.userID , userName:row.userName , userPwd:row.userPwd , status:row.status , role:row.role , realName:row.realName,location:row.location,starttime:row.starttime,endtime:row.endtime,name:row.name};
+      let data = {name:row.name , starttime:row.starttime , endtime:row.endtime , location:row.location , detail:row.detail,meetingId:row.meetingId};
+      sessionStorage.setItem("meetingId",row.meetingId)
       _this.$router.push({path:'/caiwu/management/conferenceDetail',query: data})
+
     }
   }
 }

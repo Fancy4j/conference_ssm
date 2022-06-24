@@ -77,7 +77,7 @@ export default {
   },
   created() {
     this.loginUserName = sessionStorage.getItem("loginUserName")
-    this.userID = sessionStorage.getItem("userID")
+    this.userID = sessionStorage.getItem("userId")
   },
   methods: {
     filterTime(time) {

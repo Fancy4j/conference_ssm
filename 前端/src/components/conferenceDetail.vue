@@ -5,25 +5,26 @@
       <el-container>
         <el-header
           boarder
+          height="auto"
           style="text-align: left;">
           <div>
-                  <span>会议名称：{{$route.query.userID}}</span>
-                  <span>开始时间：{{$route.query.starttime}}</span>
-                  <span>结束时间：{{$route.query.endtime}}</span>
-                  <span>地点：{{$route.query.location}}</span>
+                 <span style="font-size: 30px" >会议名称：{{$route.query.name}}</span><br>
+            <span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp开始时间：{{$route.query.starttime}}</span><br>
+                  <span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp结束时间：{{$route.query.endtime}}</span><br>
+                  <span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp地点：{{$route.query.location}}</span>
           </div>
 
         </el-header>
-        <el-main>ICSE, the International Conference on Software Engineering,® is the premier software engineering conference, providing a forum for researchers, practitioners and educators to present and discuss the most recent innovations, trends, experiences and concerns in the field of software engineering. Note that ICSE: International Conference on Software Engineering® is a registered trademark.
-        {{$route.query.introduction}}
+        <el-main>
+        {{$route.query.detail}}
           <div style="text-align: right">
-            <el-button type="primary" @click="enterSubmit()">提交稿件</el-button>
+            <el-button type="primary" @click="enterSubmit($router)">提交稿件</el-button>
           </div>
 
         </el-main>
-        <el-footer>
-          footer
-        </el-footer>
+<!--        <el-footer>-->
+<!--          footer-->
+<!--        </el-footer>-->
       </el-container>
     </el-main>
   </div>
@@ -36,20 +37,26 @@
         name: "conferenceDetail",
         data(){
             return{
+              meetingId:""
 
 
             }
         },
         created() {
-            alert(this.$router.query);
+          let _this=this
+           _this.meetingId=_this.$route.query.meetingId
+        //  sessionStorage.getItem("meetingId")
+        //  console.log(sessionStorage)
+
+
         },
 
         methods:{
           enterSubmit(){
             let _this = this;
-            // // alert($router.query.userID);
-            // let data = {userID:data.userID , userName:data.userName};
-            _this.$router.push({path:'/caiwu/management/conf_submit'})
+        //    console.log(this.$route.query);
+            let data ={meetingId:_this.meetingId}
+            _this.$router.push({path:'/caiwu/management/conf_submit',query:data})
           }
         }
     }

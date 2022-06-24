@@ -12,6 +12,9 @@
 
         <el-dropdown-menu slot="dropdown" >
           <el-dropdown-item>
+            <el-button type="text" @click="infor()"><i class="el-icon-s-tools" /> 个人信息</el-button>
+          </el-dropdown-item>
+          <el-dropdown-item>
             <el-button type="text" @click="dialogVisible = true"><i class="el-icon-lock" /> 修改密码</el-button>
           </el-dropdown-item>
           <el-dropdown-item @click.native="exitAccount"><i class="el-icon-switch-button" /> 退出登录</el-dropdown-item>
@@ -28,11 +31,11 @@
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-menu"></i>
-              <span>投稿人</span>
+              <span>{{ role }}</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/caiwu/management/userManage"><i class="el-icon-s-order" />会议信息</el-menu-item>
-              <el-menu-item index="/caiwu/management/billManage"><i class="el-icon-coin" />投稿记录</el-menu-item>
+              <el-menu-item :index="menu1_index"><i class="el-icon-s-order" />{{ menu1 }}</el-menu-item>
+              <el-menu-item :index="menu2_index"><i class="el-icon-coin" />{{ menu2 }}</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
         </el-menu>
@@ -42,6 +45,37 @@
           </router-view>
         </el-main>
     </el-container>
+
+      <el-dialog title="个人信息"
+                 :visible.sync="dialogVisible2"
+                 width="30%"
+                 @close="dialogVisible2=false"
+                 append-to-body>
+        <el-form ref="form" :model="user">
+          <el-form-item label="用户名" prop="" :label-width="formLabelWidth">
+            <span>{{user.username}}</span>
+          </el-form-item>
+          <el-form-item label="真实姓名" prop="" :label-width="formLabelWidth">
+            <span>{{user.name}}</span>
+          </el-form-item>
+          <el-form-item label="email" prop="" :label-width="formLabelWidth">
+            <span>{{user.email}}</span>
+          </el-form-item>
+<!--&lt;!&ndash;          <el-form-item label="所在地" prop="" :label-width="formLabelWidth">&ndash;&gt;-->
+<!--&lt;!&ndash;            <span>{{user.location}}</span>&ndash;&gt;-->
+<!--          </el-form-item>-->
+          <el-form-item label="所属机构" prop="" :label-width="formLabelWidth">
+            <span>{{user.administration}}</span>
+          </el-form-item>
+          <el-form-item label="网址" prop="" :label-width="formLabelWidth">
+            <span>{{user.webpage}}</span>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="dialogVisible2 = false">返回</el-button>
+        </div>
+      </el-dialog>
+
       <el-dialog title="修改密码"
                  :visible.sync="dialogVisible"
                  width="30%"
@@ -76,10 +110,29 @@
   </div>
 </template>
 <script>
+import axios from "axios";
+
 export default {
   created(){
-    this.loginUserName = sessionStorage.getItem("loginUserName")
-    this.loginRealName = sessionStorage.getItem("loginRealName")
+    this.loginUserName = sessionStorage.getItem("loginUserName");
+    this.loginRealName = sessionStorage.getItem("loginRealName");
+    this.role = sessionStorage.getItem("userRole");
+    if (this.role == "投稿人"){
+
+      this.menu1_index="/caiwu/management/userManage"
+      this.menu2_index="/caiwu/management/billManage"
+      this.menu1 = "查看会议";
+      this.menu2 = "投稿记录";
+    }else if(this.role == "审稿人"){
+      this.menu1_index="/caiwu/management/reviewerManager"
+      this.menu1 = "审稿记录";
+      this.menu2 = "";
+    }else{
+      this.menu1_index="/caiwu/management/host_conf_list"
+      this.menu2_index="/caiwu/management/host_submit"
+      this.menu1 = "主持会议列表";
+      this.menu2 = "举办新会议";
+    }
   },
   data() {
     const validateNewPassword2 = (rule, value, callback) => {
@@ -90,6 +143,20 @@ export default {
       }
     }
     return {
+      user:{
+        username:'',
+        name:'',
+        location:'',
+        email:'',
+        administration:'',
+        webpage: ''
+      },
+      dialogVisible2:false,
+      menu1_index:'',
+      menu2_index:'',
+      menu1:"",
+      menu2:"",
+      role:"",
       loginUserName: "",
       dialogVisible: false,
       loginForm: {
@@ -108,21 +175,37 @@ export default {
     }
   },
   methods: {
+    infor(){
+      let _this=this;
+      _this.dialogVisible2=true;
+      _this.$http.get(_this.$globalInfo.httpPath + '/userInfo/getUserInfo?userId=' + sessionStorage.getItem("userId")).then(function (resp) {
+        console.log(resp)
+        if(resp.data.code == 200){
+
+          _this.user=resp.data.data
+          console.log(_this.user)
+        }else{
+          _this.$message.warning(resp.data.message);
+          return false;
+        }
+      })
+    },
     updatePwd(){
       let _this = this
-      let loginUserName = sessionStorage.getItem("loginUserName");
       this.$refs.loginForm.validate(valid => {
         if (valid) {
-          _this.$http.post(_this.$globalInfo.httpPath + 'userUpdatePassword?userName=' + loginUserName+ '&newPwd='+_this.loginForm.password).then(function (resp) {
-            console.log(resp)
-            if(resp.data.code == 200){
-              _this.$message.success(resp.data.message)
-              _this.dialogVisible=false
-            }else{
-              _this.$message.warning(resp.data.message);
-              return false;
-            }
+          axios.post(_this.$globalInfo.httpPath+'/userUpdatePassword?userId='+sessionStorage.getItem("userId")+'&newPwd='+_this.loginForm.password,
+
+          ).then(function (response){
+            alert("yes!")
+            console.log(response)
           })
+            .catch(function (error){
+              alert("NOOOOO")
+              console.log(error)
+            });
+
+
         }
       })
     },
