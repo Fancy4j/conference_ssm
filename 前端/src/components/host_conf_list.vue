@@ -430,8 +430,6 @@ export default {
     },
     updateform(){
     //  alert("meetingId:"+row.meetingId)
-
-      alert("console row")
       let _this=this;
       console.log(_this.meetingId)
       ///////////////////////////////////////////////////////////////////////////////////////////////
